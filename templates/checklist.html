@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+
+{% block title %}Checklist Generator - College Admissions Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="mb-4">
+            <h1 class="h2 mb-2">
+                <i class="bi bi-check2-square text-success me-2"></i>Checklist Generator
+            </h1>
+            <p class="text-muted">
+                Generate a personalized application checklist for your target school and program.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- Input Section -->
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-building me-2"></i>School Information
+                    </div>
+                    <div class="card-body">
+                        <form id="checklist-form">
+                            <div class="mb-3">
+                                <label for="school" class="form-label">School Name *</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="school" 
+                                    placeholder="e.g., Stanford University"
+                                    required
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <label for="program" class="form-label">Program/Major</label>
+                                <input 
+                                    type="text" 
+                                    class="form-control" 
+                                    id="program" 
+                                    placeholder="e.g., Computer Science, MBA"
+                                >
+                            </div>
+                            <div class="mb-3">
+                                <label for="additional-requirements" class="form-label">
+                                    Additional Requirements (Optional)
+                                </label>
+                                <textarea 
+                                    class="form-control" 
+                                    id="additional-requirements" 
+                                    rows="4" 
+                                    placeholder="Any specific requirements you know about..."
+                                ></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success w-100" id="generate-btn">
+                                <i class="bi bi-magic me-2"></i>Generate Checklist
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Output Section -->
+            <div class="col-lg-7">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <span><i class="bi bi-list-task me-2"></i>Your Application Checklist</span>
+                        <div>
+                            <button class="btn btn-sm btn-outline-light me-2" id="save-checklist" style="display: none;">
+                                <i class="bi bi-download me-1"></i>Save
+                            </button>
+                            <button class="btn btn-sm btn-outline-light" id="print-checklist" style="display: none;">
+                                <i class="bi bi-printer me-1"></i>Print
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="checklist-output">
+                            <div class="text-center text-muted py-5">
+                                <i class="bi bi-arrow-left-circle fs-1 mb-3 d-block"></i>
+                                <p>Enter school details and click "Generate Checklist" to create your personalized checklist.</p>
+                            </div>
+                        </div>
+                        <div id="loading-indicator" class="text-center py-5" style="display: none;">
+                            <div class="spinner-border text-success mb-3" role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                            <p class="text-muted">Generating your checklist...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Summary -->
+                <div class="card border-0 shadow-sm mt-3" id="progress-card" style="display: none;">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-semibold">Progress</span>
+                            <span id="progress-text">0 / 0 completed</span>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-success" id="progress-bar" role="progressbar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let currentChecklist = [];
+
+document.getElementById('checklist-form').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const school = document.getElementById('school').value.trim();
+    const program = document.getElementById('program').value.trim();
+    const requirements = document.getElementById('additional-requirements').value.trim();
+    
+    const outputDiv = document.getElementById('checklist-output');
+    const loadingDiv = document.getElementById('loading-indicator');
+    const submitBtn = document.getElementById('generate-btn');
+    const saveBtn = document.getElementById('save-checklist');
+    const printBtn = document.getElementById('print-checklist');
+    const progressCard = document.getElementById('progress-card');
+    
+    if (!school) {
+        alert('Please enter a school name.');
+        return;
+    }
+    
+    // Show loading
+    outputDiv.style.display = 'none';
+    loadingDiv.style.display = 'block';
+    saveBtn.style.display = 'none';
+    printBtn.style.display = 'none';
+    progressCard.style.display = 'none';
+    submitBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/api/generate-checklist', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ school, program, requirements })
+        });
+        
+        const data = await response.json();
+        
+        if (data.error) {
+            outputDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+        } else {
+            currentChecklist = data.checklist;
+            renderChecklist(data.checklist, school);
+            saveBtn.style.display = 'inline-block';
+            printBtn.style.display = 'inline-block';
+            progressCard.style.display = 'block';
+            updateProgress();
+            
+            // Save to localStorage
+            saveToLocalStorage(school, data.checklist);
+        }
+    } catch (error) {
+        outputDiv.innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+    }
+    
+    loadingDiv.style.display = 'none';
+    outputDiv.style.display = 'block';
+    submitBtn.disabled = false;
+});
+
+function renderChecklist(checklist, school) {
+    const outputDiv = document.getElementById('checklist-output');
+    
+    // Group by category
+    const grouped = {};
+    checklist.forEach((item, index) => {
+        const category = item.category || 'General';
+        if (!grouped[category]) {
+            grouped[category] = [];
+        }
+        grouped[category].push({ ...item, index });
+    });
+    
+    let html = `<h5 class="mb-3">${school}</h5>`;
+    
+    for (const [category, items] of Object.entries(grouped)) {
+        html += `
+            <div class="checklist-category mb-3">
+                <h6 class="text-muted border-bottom pb-2">${category}</h6>
+                <div class="checklist-items">
+        `;
+        
+        items.forEach(item => {
+            const priorityClass = item.priority === 'high' ? 'text-danger' : 
+                                  item.priority === 'medium' ? 'text-warning' : 'text-muted';
+            const priorityIcon = item.priority === 'high' ? 'exclamation-circle' : 
+                                 item.priority === 'medium' ? 'dash-circle' : 'circle';
+            
+            html += `
+                <div class="form-check mb-2 checklist-item">
+                    <input class="form-check-input" type="checkbox" id="item-${item.index}" 
+                           onchange="updateProgress()" data-index="${item.index}">
+                    <label class="form-check-label" for="item-${item.index}">
+                        ${item.item}
+                        <i class="bi bi-${priorityIcon} ${priorityClass} ms-2" 
+                           title="${item.priority} priority"></i>
+                    </label>
+                </div>
+            `;
+        });
+        
+        html += `</div></div>`;
+    }
+    
+    outputDiv.innerHTML = html;
+}
+
+function updateProgress() {
+    const checkboxes = document.querySelectorAll('.checklist-item input[type="checkbox"]');
+    const total = checkboxes.length;
+    const checked = Array.from(checkboxes).filter(cb => cb.checked).length;
+    
+    const percentage = total > 0 ? (checked / total) * 100 : 0;
+    
+    document.getElementById('progress-bar').style.width = `${percentage}%`;
+    document.getElementById('progress-text').textContent = `${checked} / ${total} completed`;
+}
+
+function saveToLocalStorage(school, checklist) {
+    const key = `checklist_${school.replace(/\s+/g, '_')}`;
+    localStorage.setItem(key, JSON.stringify(checklist));
+}
+
+document.getElementById('save-checklist').addEventListener('click', function() {
+    const content = document.getElementById('checklist-output').innerText;
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'application-checklist.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+});
+
+document.getElementById('print-checklist').addEventListener('click', function() {
+    window.print();
+});
+</script>
+{% endblock %}

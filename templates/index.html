@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Home - College Admissions Assistant{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Hero Section -->
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                <i class="bi bi-mortarboard-fill me-2"></i>College Admissions Assistant
+            </h1>
+            <p class="lead text-muted">
+                Navigate the college application process with confidence. 
+                Our AI-powered tools help you understand requirements and stay organized.
+            </p>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3">
+                            <i class="bi bi-file-text fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Requirement Summarizer</h3>
+                        <p class="text-muted mb-4">
+                            Paste lengthy program requirements and get a clear, organized summary. 
+                            Our AI extracts key information about prerequisites, test scores, 
+                            deadlines, and required materials.
+                        </p>
+                        <a href="/summarize" class="btn btn-primary">
+                            <i class="bi bi-arrow-right me-1"></i>Start Summarizing
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100 border-0 shadow-sm feature-card">
+                    <div class="card-body text-center p-4">
+                        <div class="feature-icon bg-success bg-gradient text-white rounded-circle mb-3">
+                            <i class="bi bi-check2-square fs-3"></i>
+                        </div>
+                        <h3 class="h4 mb-3">Checklist Generator</h3>
+                        <p class="text-muted mb-4">
+                            Generate personalized application checklists for any school or program. 
+                            Stay organized and never miss a requirement with our comprehensive 
+                            task tracking.
+                        </p>
+                        <a href="/checklist" class="btn btn-success">
+                            <i class="bi bi-arrow-right me-1"></i>Create Checklist
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- How It Works Section -->
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h2 class="h4 text-center mb-4">How It Works</h2>
+                <div class="row g-4">
+                    <div class="col-md-4 text-center">
+                        <div class="step-number">1</div>
+                        <h5>Input Requirements</h5>
+                        <p class="text-muted small">
+                            Paste program requirements or enter school details
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="step-number">2</div>
+                        <h5>AI Processing</h5>
+                        <p class="text-muted small">
+                            Our AI analyzes and organizes the information
+                        </p>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <div class="step-number">3</div>
+                        <h5>Get Results</h5>
+                        <p class="text-muted small">
+                            Receive clear summaries or actionable checklists
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
