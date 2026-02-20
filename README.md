@@ -70,21 +70,6 @@ This project addresses that problem by automatically organizing raw admission te
 
 ---
 
-## 📂 Project Structure
-
-College Admission Assistant/
-│
-├── app.py
-├── requirements.txt
-├── templates/
-│   ├── index.html
-│   ├── summarizer.html
-│   └── checklist.html
-├── static/
-│   ├── css/
-│   └── js/
----
-
 ## ⚙️ Installation & Setup
 
 ### 1️⃣ Clone the repository
